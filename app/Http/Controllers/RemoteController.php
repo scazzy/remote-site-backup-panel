@@ -24,7 +24,7 @@ class RemoteController extends Controller {
 
 
   /**
-   * @param site: address, username, pass, path
+   * @param site: ssh_address, ssh_username, ssh_password, ssh_path
    */
   public function __construct(Array $site) {
     if($site) {
@@ -36,11 +36,11 @@ class RemoteController extends Controller {
 
   public function init(Array $site) {
     $this->site = $site;
-    if(! ($site['address'] && $site['username'] && $site['pass'] && $site['path']) ) {
+    if(! ($site['ssh_address'] && $site['ssh_username'] && $site['ssh_password'] && $site['ssh_path']) ) {
       return false;
     }
-    $this->ssh = new SSH2($site['address']);
-    $this->sftp = new SFTP($site['address']);
+    $this->ssh = new SSH2($site['ssh_address']);
+    $this->sftp = new SFTP($site['ssh_address']);
     $this->localBackupPath = base_path().'/backups/';
 
     // Create backup folder if doesn't exist
@@ -59,7 +59,7 @@ class RemoteController extends Controller {
     if(!$this->site) {
       return 'ERROR: Provide site details';
     }
-    if (!$this->ssh->login($this->site['username'], $this->site['pass'])) {
+    if (!$this->ssh->login($this->site['ssh_username'], $this->site['ssh_password'])) {
         return false;
     }
     $this->isConnectedSSH = true;
@@ -76,7 +76,7 @@ class RemoteController extends Controller {
     if(!$this->site) {
       return 'ERROR: Provide site details';
     }
-    if (!$this->sftp->login($this->site['username'], $this->site['pass'])) {
+    if (!$this->sftp->login($this->site['ssh_username'], $this->site['ssh_password'])) {
         return false;
     }
     $this->isConnectedSFTP = true;
@@ -91,14 +91,14 @@ class RemoteController extends Controller {
     // SSH server -> compress folder (hash(sitename)_date)
     // SFTP Server -> download compressed folder
 
-    if(trim($this->site['path']) !== '') {
+    if(trim($this->site['ssh_path']) !== '') {
       // SSH into remote server if not already
       $this->connectSSH();
 
-      $remotePath = rtrim($this->site['path'], '/') . '/';
-      $backupFilename = md5($this->site['address']).'_'.time().'.tar.gz';
+      $remotePath = rtrim($this->site['ssh_path'], '/') . '/';
+      $backupFilename = md5($this->site['ssh_address']).'_'.time().'.tar.gz';
 
-      $cmdCompress = "tar cvf - ".$this->site['path']." | gzip -9 - > ".$remotePath.$backupFilename.PHP_EOL;
+      $cmdCompress = "tar cvf - ".$this->site['ssh_path']." | gzip -9 - > ".$remotePath.$backupFilename.PHP_EOL;
       $cmdDeleteArchive = "rm -f ".$remotePath.$backupFilename.PHP_EOL;
 
       // Compress remote directory

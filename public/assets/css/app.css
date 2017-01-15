@@ -1371,5 +1371,32 @@ table {
   color: inherit;
   text-decoration: none;
 }
+.pure-menu-horizontal .pure-menu-children {
+  max-width: none;
+  border: 1px solid #ddd;
+}
+.btn-backup-site {
+  position: relative;
+}
+.btn-backup-site.loading {
+  pointer-events: none;
+}
+.btn-backup-site.loading:after {
+  content: 'Processing...';
+  display: -ms-flexbox;
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: inherit;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  background-color: yellow;
+  color: black;
+}
 
 /*# sourceMappingURL=app.css.map */

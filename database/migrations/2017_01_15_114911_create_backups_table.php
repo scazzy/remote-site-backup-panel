@@ -19,7 +19,8 @@ class CreateBackupsTable extends Migration
             $table->string('filepath', 500);  // Full Archive path
             $table->string('checksum', 255);  // Hash of archive file, if required for later checks
 
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            // $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamps();
             $table->foreign('site_id')->references('id')->on('sites')->onDelete('cascade');
         });
     }

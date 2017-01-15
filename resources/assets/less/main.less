@@ -33,3 +33,29 @@ body {
     text-decoration: none;
   }
 }
+
+.pure-menu-horizontal .pure-menu-children {
+  max-width: none;
+  border: 1px solid #ddd;
+}
+
+.btn-backup-site {
+  position: relative;
+  &.loading {
+    pointer-events: none;
+  }
+  &.loading:after {
+    content: 'Processing...';
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: inherit;
+    align-items: center;
+    justify-content: center;
+    background-color: yellow;
+    color: black;
+  }
+}

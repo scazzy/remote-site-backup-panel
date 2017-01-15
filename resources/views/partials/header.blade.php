@@ -1,6 +1,6 @@
 <header class="header pure-g">
   <h1 class="pure-u-1-5 logo">
-    <a href="/">Logo</a>
+    <a href="/">BackMeUp</a>
   </h1>
 
   <div class="pure-u-4-5 align-right">

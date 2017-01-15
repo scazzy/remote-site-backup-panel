@@ -18,11 +18,13 @@ Route::get('/', function () {
 Route::get('/sites', ['as' => 'all_sites', 'uses' => 'BackupController@allSites']);
 
 Route::any('/sites/add', ['as' => 'add_site', 'uses' => 'BackupController@addSite']);
-Route::any('/sites/{id}', ['as' => 'add_site', 'uses' => 'BackupController@addSite']);  // View, Add, Edit
+Route::any('/sites/{id}/edit', ['as' => 'edit_site', 'uses' => 'BackupController@addSite']);  // View, Add, Edit
+// Route::any('/sites/{id}', ['as' => 'view_site', 'uses' => 'BackupController@viewSite']);  // View, Add, Edit
 
 
 /**
  * REST APIs
  */
-Route::post('/test/ssh', ['as' => 'test_ssh', 'uses' => 'BackupController@testSSH']);
-Route::post('/test/mysql', ['as' => 'test_mysql', 'uses' => 'BackupController@testMysql']);
+Route::post('/api/test/ssh', ['as' => 'api.test_ssh', 'uses' => 'BackupController@testSSH']);
+Route::post('/api/test/mysql', ['as' => 'api.test_mysql', 'uses' => 'BackupController@testMysql']);
+Route::post('/api/backup', ['as' => 'api.backup_site', 'uses' => 'BackupController@backupApi']);
