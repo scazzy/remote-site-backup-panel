@@ -20,5 +20,7 @@ class Sites extends Eloquent{
 		'db_database',
 		'notes',
 		'is_active',
+		'created_at',
+		'updated_at',
 	];
 }

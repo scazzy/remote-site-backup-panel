@@ -140,6 +140,7 @@ class BackupController extends Controller {
     }
     $row = $this->backupRepo->getSite($siteId);
     $rcdata = [
+      'site_id' => $row->id,
       'ssh_address' => $row->ssh_address,
       'ssh_path' => $row->ssh_path,
       'ssh_username' => $row->ssh_username,

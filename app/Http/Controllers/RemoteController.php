@@ -11,6 +11,9 @@ use App\Http\Controllers\Controller;
 use phpseclib\Crypt\RSA;
 use phpseclib\Net\SSH2;
 use phpseclib\Net\SFTP;
+use App\Models\Sites;
+use App\Models\Backups;
+use DB;
 
 class RemoteController extends Controller {
   protected $ssh;
@@ -90,10 +93,10 @@ class RemoteController extends Controller {
   public function doSiteBackup() {
     // SSH server -> compress folder (hash(sitename)_date)
     // SFTP Server -> download compressed folder
+    if(trim($this->site['ssh_path']) !== '' && isset($this->site['site_id'])) {
 
-    if(trim($this->site['ssh_path']) !== '') {
       // SSH into remote server if not already
-      $this->connectSSH();
+      // $this->connectSSH();
 
       $remotePath = rtrim($this->site['ssh_path'], '/') . '/';
       $backupFilename = md5($this->site['ssh_address']).'_'.time().'.tar.gz';
@@ -115,6 +118,14 @@ class RemoteController extends Controller {
       //
       // STORE INFO IN DB
       //
+      $inserData = [
+        'site_id' => $this->site['site_id'],
+        'filename' => $backupFilename,
+        'filepath' => $this->localBackupPath.$backupFilename,
+        'checksum' => file_exists($this->localBackupPath.$backupFilename) ? md5_file($this->localBackupPath.$backupFilename) : '',
+      ];
+      Backups::insert($inserData);
+      Sites::find($this->site['site_id'])->fill(['last_backup' => date('Y-m-d h:i:s')])->save();
 
       return true;
     }
