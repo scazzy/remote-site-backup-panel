@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateBackupsTable extends Migration
+class CreateTableScheduler extends Migration
 {
     /**
      * Run the migrations.
@@ -12,15 +12,11 @@ class CreateBackupsTable extends Migration
      */
     public function up()
     {
-        Schema::create('backups', function (Blueprint $table) {
+        Schema::create('scheduler', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('site_id')->unsigned();
-            $table->string('filename', 255);  // Archive name
-            $table->string('filepath', 500);  // Full Archive path
-            $table->string('checksum', 255);  // Hash of archive file, if required for later checks
-
+            $table->string('cron_schedule', 20);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->foreign('site_id')->references('id')->on('sites')->onDelete('cascade');
         });
     }
 
@@ -31,6 +27,6 @@ class CreateBackupsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('backups');
+        Schema::drop('scheduler');
     }
 }

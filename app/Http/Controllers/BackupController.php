@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\RemoteController;
 use App\Services\Repositories\BackupRepository;
 use App\Models\Sites;
+use App\Models\Backups;
 use Request;
 use Response;
 use DB;
@@ -23,10 +24,16 @@ class BackupController extends Controller {
       'ssh_username' => 'root',
       'ssh_password' => 'testingxyz123',
       'ssh_path' => '/var/www/html/',
+      'backup' => [
+        'id' => 3,
+        'filename' => '',
+        'filepath' => '',
+        ]
     ];
     $this->backupRepo = $backupRepo;
-    // $remote = new RemoteController($site);
-    // var_dump($remote->doSiteBackup());
+    $remote = new RemoteController($site);
+    $remote->doSiteRestore();
+    
   }
 
 
@@ -164,8 +171,54 @@ class BackupController extends Controller {
     return Response::json($response);
   }
 
+
+
   /**
-   * Test SSH details
+   * API: Restore a backup
+   */
+  public function restoreApi($backupId = null) {
+    $input = Request::input();
+    $backupId = $backupId ? $backupId : (isset($input['backupId']) ? $input['backupId'] : null);
+
+    if(!$backupId) {
+      return Response::json([
+        'status' => false,
+        'message' => 'Invalid backup:id'
+      ]);
+    }
+    $row = $this->backupRepo->getBackupDetail($backupId, true);
+    $rcdata = [
+      'site_id' => $row->site->id,
+      'ssh_address' => $row->site->ssh_address,
+      'ssh_path' => $row->site->ssh_path,
+      'ssh_username' => $row->site->ssh_username,
+      'ssh_password' => base64_decode($row->site->ssh_password),
+      'backup' => [
+        'id' => $row->id,
+        'filename' => $row->filename,
+        'filepath' => $row->filepath,
+      ]
+    ];
+    $remote = new RemoteController($rcdata);
+    $restoreStatus = $remote->doSiteRestore();
+
+    if($restoreStatus === true) {
+      $response = [
+        'status' => true,
+        'message' => 'Backup was successfully restored'
+      ];
+    } else {
+      $response = [
+        'status' => true,
+        'message' => 'There was some problem with the restore. Please check with the administrator'
+      ];
+    }
+
+    return Response::json($response);
+  }
+
+  /**
+   * API: Test SSH details
    */
   public function testSSH() {
     $input = Request::input();
@@ -186,6 +239,49 @@ class BackupController extends Controller {
     return Response::json($response);
   }
 
+  /**
+   * List of backups for a site
+   */
+  public function siteBackupList($siteId = null) {
+    if(!$siteId) {
+      return Response::json([
+        'status' => false,
+        'message' => 'Invalid site:id'
+      ]);
+    }
+    $site = $this->backupRepo->getSite($siteId);
+    $backups = Backups::whereSiteId($siteId)->orderBy('id','desc')->get()->toArray();
 
+    $data = [
+      'backups' => $backups,
+      'site' => $site,
+    ];
+
+    return view('pages.siteBackupList')->with('data', $data);
+  }
+
+
+  /**
+   * Backup Scheduler
+   */
+  public function pageScheduler () {
+
+    // If Request data, Save new schedule
+    $input = Request::input();
+    if(Request::isMethod('post') && isset($input['site_id']) && isset($input['cron_schedule'])) {
+      $id = DB::table('scheduler')->insert([
+        'site_id' => $input['site_id'],
+        'cron_schedule' => $input['cron_schedule'],
+      ]);
+      if($id) {
+        return redirect()->route('scheduler');
+      }
+    }
+
+    $sites = $this->backupRepo->getSites()->toArray();
+    $schedules = $this->backupRepo->getSchedules();
+    return view('pages.pageScheduler')->with('data', ['sites' => $sites, 'schedules' => $schedules]);
+  }
+  
 
 }

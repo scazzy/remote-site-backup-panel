@@ -7,6 +7,7 @@
   // List of APIs
   const API = {
     backup: '/api/backup',
+    restore: '/api/restore',
     testSSH: '/api/test/ssh',
   };
 
@@ -74,6 +75,10 @@
     UI.$b.on('click', '.btn-backup-site', function () {
       const $btn = $(this);
       const siteId = $btn.data('site');
+      if(!confirm("Are you sure to do the backup?\nDo not refresh the page until backup is completed.")) {
+        return false;
+      }
+
       $btn.addClass('loading');
       $.ajax({
         type: 'POST',
@@ -97,5 +102,38 @@
 
       return false;
     });
+
+    // Restore a backup
+    UI.$b.on('click', '.btn-site-restore', function () {
+      const $btn = $(this);
+      const backupId = $btn.data('backup');
+      if(!confirm("Are you sure to restore your site to this backup?\nDo not refresh the page until backup is completed.")) {
+        return false;
+      }
+      $btn.addClass('loading');
+      $.ajax({
+        type: 'POST',
+        url: API.restore,
+        data: JSON.stringify({ backupId: backupId }),
+        contentType: 'application/json',
+        success: function(response){
+          console.log(response);
+          $btn.removeClass('loading');
+          if(response.status === true) {
+            // Update last backup date
+            alert(response.message);
+          } else {
+            alert("There was some error: " + response.message);
+          }
+        },
+        error: function(xhr, type){
+          $btn.removeClass('loading');
+          alert('Ajax error: ' + xhr.statusText);
+        }
+      });
+
+      return false;
+    });
+    
   }
 })(Zepto);

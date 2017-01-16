@@ -18,10 +18,12 @@
       @foreach($data['sites'] as $item)
         <tr>
             <td>{{$item['id']}}</td>
-            <td><a href="{{route('edit_site', ['id' => $item['id']])}}">{{$item['site_name']}}</a></td>
+            <td><a href="{{route('site_backups', ['id'=>$item['id']])}}">{{$item['site_name']}}</a></td>
             <td>{{$item['ssh_address']}}</td>
             <td>{{$item['last_backup'] ? date('Y-m-d h:i', strtotime($item['last_backup'])) : ''}}</td>
             <td class="align-right">
+              <a href="{{route('site_backups', ['id'=>$item['id']])}}"><small>View backups</small></a>
+              &nbsp;
               <button class="pure-button btn-backup-site pure-button-primary" data-site="{{$item['id']}}">Backup</button>
               <a class="pure-button pure-button-success" href="{{route('edit_site', ['id' => $item['id']])}}">Edit</a>
             </td>

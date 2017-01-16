@@ -1336,6 +1336,9 @@ striping:
 .full-width {
   width: 100%;
 }
+.rfloat {
+  float: right;
+}
 table {
   width: 100%;
 }
@@ -1375,14 +1378,16 @@ table {
   max-width: none;
   border: 1px solid #ddd;
 }
-.btn-backup-site {
+.pure-button {
   position: relative;
+  padding: 5px 11px;
+  font-size: 14px;
 }
-.btn-backup-site.loading {
+.pure-button.loading {
   pointer-events: none;
 }
-.btn-backup-site.loading:after {
-  content: 'Processing...';
+.pure-button.loading:after {
+  content: 'Loading...';
   display: -ms-flexbox;
   display: flex;
   position: absolute;

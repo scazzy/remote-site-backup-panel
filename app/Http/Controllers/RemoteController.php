@@ -13,6 +13,7 @@ use phpseclib\Net\SSH2;
 use phpseclib\Net\SFTP;
 use App\Models\Sites;
 use App\Models\Backups;
+use Response;
 use DB;
 
 class RemoteController extends Controller {
@@ -96,12 +97,13 @@ class RemoteController extends Controller {
     if(trim($this->site['ssh_path']) !== '' && isset($this->site['site_id'])) {
 
       // SSH into remote server if not already
-      // $this->connectSSH();
+      $this->connectSSH();
+      $now = time();
+      $remotePath = dirname($this->site['ssh_path']) . '/';
+      $backupFilename = md5($this->site['ssh_address']).'_'.$now.'.tar.gz';
 
-      $remotePath = rtrim($this->site['ssh_path'], '/') . '/';
-      $backupFilename = md5($this->site['ssh_address']).'_'.time().'.tar.gz';
-
-      $cmdCompress = "tar cvf - ".$this->site['ssh_path']." | gzip -9 - > ".$remotePath.$backupFilename.PHP_EOL;
+      // $cmdCompress = "tar cvf - ".$this->site['ssh_path']." | gzip -9 - > ".$remotePath.$backupFilename.PHP_EOL;
+      $cmdCompress = "tar -zcvf ".$remotePath.$backupFilename." -C ".$this->site['ssh_path']." .".PHP_EOL;
       $cmdDeleteArchive = "rm -f ".$remotePath.$backupFilename.PHP_EOL;
 
       // Compress remote directory
@@ -125,11 +127,51 @@ class RemoteController extends Controller {
         'checksum' => file_exists($this->localBackupPath.$backupFilename) ? md5_file($this->localBackupPath.$backupFilename) : '',
       ];
       Backups::insert($inserData);
-      Sites::find($this->site['site_id'])->fill(['last_backup' => date('Y-m-d h:i:s')])->save();
+      Sites::find($this->site['site_id'])->update(['last_backup' => date('Y-m-d h:i:s', $now)]);
 
       return true;
     }
     return false;
   }
+
+
+  /**
+   * Restore a backup
+   */
+  public function doSiteRestore() {
+      // Steps
+      // Check if archive file exists
+      // SSH: Log into SSH server
+      // SFTP: Upload backup file on remote server
+      // SSH: Unzip the archive on remote server in the ssh_path directory
+    if(isset($this->site['backup'])) {
+      if(!file_exists($this->site['backup']['filepath'])) {
+        $response = [
+          'status' => false,
+          'message' => 'Missing backup archive file',
+        ];
+        return false;
+      }
+
+      // Getting one folder previous to site path
+      $previousRemotePath = dirname($this->site['ssh_path']).'/';
+      $filename = $this->site['backup']['filename'];
+
+      // gunzip -c 3d6fba4cf65ce03259655b55293e485c_1484573230.tar.gz | tar -xvf - -C abc/
+      $cmdExtract = "tar -xvzf ".$previousRemotePath.$filename." -C ".$this->site['ssh_path'].PHP_EOL;
+      $cmdDeleteArchive = "rm -f ".$previousRemotePath.$filename.PHP_EOL;
+      $this->connectSFTP();
+      $this->sftp->put($previousRemotePath.$filename, $this->site['backup']['filepath'], 'NET_SFTP_LOCAL_FILE');
+      $this->connectSSH();
+      $this->ssh->exec($cmdExtract);
+      sleep(3);
+      $this->ssh->exec($cmdDeleteArchive);
+
+      return true;
+    }
+    return false;
+  }
+
+    
 
 }

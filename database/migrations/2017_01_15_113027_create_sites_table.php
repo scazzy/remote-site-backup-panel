@@ -29,7 +29,8 @@ class CreateSitesTable extends Migration
             $table->boolean('is_db_backup_enabled')->default(0);
             $table->boolean('is_active')->default(1);
             $table->string('notes');
-            $table->timestamps('created_at');
+            $table->timestamp('last_backup')->nullable()->default(null);
+            $table->timestamps();
         });
     }
 

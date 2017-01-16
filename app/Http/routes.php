@@ -19,7 +19,9 @@ Route::get('/sites', ['as' => 'all_sites', 'uses' => 'BackupController@allSites'
 
 Route::any('/sites/add', ['as' => 'add_site', 'uses' => 'BackupController@addSite']);
 Route::any('/sites/{id}/edit', ['as' => 'edit_site', 'uses' => 'BackupController@addSite']);  // View, Add, Edit
-// Route::any('/sites/{id}', ['as' => 'view_site', 'uses' => 'BackupController@viewSite']);  // View, Add, Edit
+Route::any('/sites/{id}/backups', ['as' => 'site_backups', 'uses' => 'BackupController@siteBackupList']);  // View list of backups for the site
+Route::any('/scheduler', ['as' => 'scheduler', 'uses' => 'BackupController@pageScheduler']);  // Schedule Backups
+
 
 
 /**
@@ -28,3 +30,4 @@ Route::any('/sites/{id}/edit', ['as' => 'edit_site', 'uses' => 'BackupController
 Route::post('/api/test/ssh', ['as' => 'api.test_ssh', 'uses' => 'BackupController@testSSH']);
 Route::post('/api/test/mysql', ['as' => 'api.test_mysql', 'uses' => 'BackupController@testMysql']);
 Route::post('/api/backup', ['as' => 'api.backup_site', 'uses' => 'BackupController@backupApi']);
+Route::post('/api/restore', ['as' => 'api.restore_site', 'uses' => 'BackupController@restoreApi']);

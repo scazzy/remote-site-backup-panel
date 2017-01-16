@@ -39,13 +39,15 @@ body {
   border: 1px solid #ddd;
 }
 
-.btn-backup-site {
+.pure-button {
   position: relative;
+  padding: 5px 11px;
+  font-size: 14px;
   &.loading {
     pointer-events: none;
   }
   &.loading:after {
-    content: 'Processing...';
+    content: 'Loading...';
     display: flex;
     position: absolute;
     left: 0;
