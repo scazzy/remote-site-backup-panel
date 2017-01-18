@@ -14,7 +14,7 @@ $scounter = 0;
             <option value="{{$item['id']}}">{{$item['site_name']}}</option>
             @endforeach
         </select>
-        <input type="text" name="cron_schedule" required placeholder="Schedule. Eg: * * * * * *">
+        <input type="text" name="frequency" required placeholder="Schedule. Eg: * * * * * *">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <button type="submit" class="pure-button pure-button-primary">Add Schedule</button>
     </fieldset>
@@ -32,11 +32,11 @@ $scounter = 0;
         </tr>
     </thead>
     <tbody>
-        @foreach($data['schedules'] as $item)
+        @foreach($data['jobs'] as $item)
         <tr>
             <td>{{++$scounter}}</td>
-            <td>{{$item->site_name}}</td>
-            <td>{{$item->cron_schedule}}</td>
+            <td><a href="{{route('site_backups', ['id' => $item->site_id])}}">{{$item->site_name}}</a></td>
+            <td>{{$item->frequency}}</td>
             <th></th>
         </tr>
         @endforeach

@@ -10,9 +10,6 @@ use App\Models\Backups;
 use DB;
 
 class BackupRepository extends Repository {
-  public function __construct() {
-
-  }
 
   /**
    * Get all Sites
@@ -48,10 +45,10 @@ class BackupRepository extends Repository {
    * Get Backup Schedules
    * @type {Array}
    */
-  public function getSchedules() {
+  public function getJobs() {
     $data = DB::select("
-      SELECT c.id, c.site_id, c.cron_schedule, s.site_name, s.ssh_address
-      FROM scheduler c LEFT JOIN sites s ON c.site_id = s.id
+      SELECT c.id, c.site_id, c.frequency, s.site_name, s.ssh_address
+      FROM jobs c LEFT JOIN sites s ON c.site_id = s.id
       ORDER BY c.created_at DESC
     ");
     return $data;

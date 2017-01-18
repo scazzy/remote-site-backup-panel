@@ -1342,6 +1342,19 @@ striping:
 table {
   width: 100%;
 }
+.alert {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  background-color: #eee;
+}
+.alert > p {
+  margin: 5px 0;
+}
+.alert.alert-success {
+  background-color: #05ecc6;
+  border: none;
+}
 * {
   box-sizing: border-box;
   max-width: 100%;

@@ -48,7 +48,7 @@
         alert('Please enter valid data. All fields are mandatory.');
         return false;
       }
-
+      $btn.addClass('loading');
       $.ajax({
         type: 'POST',
         url: API.testSSH,
@@ -56,6 +56,7 @@
         contentType: 'application/json',
         success: function(response){
           console.log(response);
+          $btn.removeClass('loading');
           if(response.status === true) {
             // Update last backup date
             alert(response.message);
@@ -133,6 +134,18 @@
       });
 
       return false;
+    });
+
+
+    // Toggle Mysql details in db
+    UI.$b.on('change', '#btnSiteMysqlToggle', function () {
+      const $btn = $(this);
+      const $myqlForm = $('#form-section-mysql');
+      if($btn.is(':checked')) {
+        $myqlForm.removeClass('hidden');
+      } else {
+        $myqlForm.addClass('hidden');
+      }
     });
     
   }

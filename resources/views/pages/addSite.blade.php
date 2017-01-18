@@ -5,9 +5,14 @@
 <p>
   This tool currently only supports servers with SSH access.
 <br/>
-Add or update a new website details. Take SSH and mysql Details
+Add or update a new website details.
 </p>
 
+@if(Request::input('saved'))
+<div class="alert alert-success">
+  <p>Saved successfully</p>
+</div>
+@endif
 <form method="post" class="pure-form pure-form-aligned">
   <legend><strong>Site SSH details</strong></legend>
     <fieldset>
@@ -42,16 +47,34 @@ Add or update a new website details. Take SSH and mysql Details
         </div>
     </fieldset>
 
-    <label for="db_yes" class="pure-checkbox">
-        <input id="db_yes" name="db_yes" type="checkbox"{{$data['is_db_backup_enabled']?' checked':''}}> Add MySQL details
+    <label for="btnSiteMysqlToggle" class="pure-checkbox">
+        <input id="btnSiteMysqlToggle" name="db_yes" type="checkbox"{{$data['is_db_backup_enabled']?' checked':''}}> Add MySQL details
     </label>
-    <!-- <legend><strong>MySQL Database details</strong></legend> -->
-    <!-- <fieldset>
-      <div class="pure-control-group">
-          <label for="name">Site Name</label>
-          <input id="name" type="text" placeholder="eg: Hello World">
-      </div>
-    </fieldset> -->
+    <div id="form-section-mysql" class="{{$data['is_db_backup_enabled']?'':'hidden'}}">
+        <legend><strong>MySQL Database details</strong><br/>
+      <small>Note: You can only backup, but not restore mysql database as of this app version</small>
+
+        </legend>
+
+        <fieldset>
+          <div class="pure-control-group">
+              <label>Host</label>
+              <input name="db_host" type="text" placeholder="localhost" value="{{$data['db_host']}}"/>
+          </div>
+          <div class="pure-control-group">
+              <label>Database</label>
+              <input name="db_database" type="text" placeholder="Database" value="{{$data['db_database']}}"/>
+          </div>
+          <div class="pure-control-group">
+              <label>Username</label>
+              <input name="db_username" type="text" placeholder="Username" value="{{$data['db_username']}}"/>
+          </div>
+          <div class="pure-control-group">
+              <label>Password</label>
+              <input name="db_password" type="password" placeholder="Password" value="{{base64_decode($data['db_password'])}}"/>
+          </div>
+        </fieldset>
+    </div>
 
     <br/>
     <br/>

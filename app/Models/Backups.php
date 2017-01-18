@@ -9,7 +9,8 @@ class Backups extends Eloquent{
 	protected $fillable = [
 		'site_id',
 		'filename',
-		'filepath',
+        'filepath',
+		'dbpath',
 		'checksum',
 		'created_at',
 		'updated_at',

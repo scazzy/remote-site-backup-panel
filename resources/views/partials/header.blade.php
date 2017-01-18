@@ -9,7 +9,7 @@
             <li class="pure-menu-item"><a href="/" class="pure-menu-link">Home</a></li>
             <li class="pure-menu-item"><a href="{{route('all_sites')}}" class="pure-menu-link">All sites</a></li>
             <li class="pure-menu-item"><a href="{{route('add_site')}}" class="pure-menu-link">Add a site</a></li>
-            <li class="pure-menu-item"><a href="{{route('scheduler')}}" class="pure-menu-link">Scheduler</a></li>
+            <li class="pure-menu-item"><a href="{{route('jobs')}}" class="pure-menu-link">Scheduler</a></li>
 {{-- 
             <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover">
                 <a href="{{route('all_sites')}}" class="pure-menu-link">Sites</a>

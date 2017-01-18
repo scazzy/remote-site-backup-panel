@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTableScheduler extends Migration
+class CreateTableJobs extends Migration
 {
     /**
      * Run the migrations.
@@ -12,10 +12,10 @@ class CreateTableScheduler extends Migration
      */
     public function up()
     {
-        Schema::create('scheduler', function (Blueprint $table) {
+        Schema::create('jobs', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('site_id')->unsigned();
-            $table->string('cron_schedule', 20);
+            $table->string('frequency', 20);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
         });
     }
@@ -27,6 +27,6 @@ class CreateTableScheduler extends Migration
      */
     public function down()
     {
-        Schema::drop('scheduler');
+        Schema::drop('jobs');
     }
 }

@@ -19,24 +19,8 @@ class BackupController extends Controller {
   protected $backupRepo;
 
   public function __construct(BackupRepository $backupRepo) {
-    $site = [
-      'ssh_address' => '67.205.146.240',
-      'ssh_username' => 'root',
-      'ssh_password' => 'testingxyz123',
-      'ssh_path' => '/var/www/html/',
-      'backup' => [
-        'id' => 3,
-        'filename' => '',
-        'filepath' => '',
-        ]
-    ];
     $this->backupRepo = $backupRepo;
-    $remote = new RemoteController($site);
-    $remote->doSiteRestore();
-    
   }
-
-
 
   /**
    * List of all sites to backup
@@ -88,11 +72,16 @@ class BackupController extends Controller {
         'ssh_password' => base64_encode(trim($input['ssh_password'])),
         'ssh_path' => trim($input['ssh_path']),
         'is_db_backup_enabled' => isset($input['db_yes']) ? 1 : 0,
+        'db_host' => trim($input['db_host']),
+        'db_database' => trim($input['db_database']),
+        'db_username' => trim($input['db_username']),
+        'db_password' => base64_encode(trim($input['db_password'])),
         'notes' => trim($input['notes']),
       ];
 
       if($row) { // Update
         $siteId = $row->fill($updatedData)->save();
+        return redirect()->route('edit_site', ['id' => $siteId, 'saved' => 1]);
         // Show message it's updated
       } else { // Insert
         $siteId = Sites::insert($updatedData);
@@ -145,15 +134,12 @@ class BackupController extends Controller {
         'message' => 'Invalid site:id'
       ]);
     }
-    $row = $this->backupRepo->getSite($siteId);
-    $rcdata = [
-      'site_id' => $row->id,
-      'ssh_address' => $row->ssh_address,
-      'ssh_path' => $row->ssh_path,
-      'ssh_username' => $row->ssh_username,
-      'ssh_password' => base64_decode($row->ssh_password),
-    ];
-    $remote = new RemoteController($rcdata);
+    $row = $this->backupRepo->getSite($siteId)->toArray();
+    $row['site_id'] = base64_decode($row['id']);
+    $row['ssh_password'] = base64_decode($row['ssh_password']);
+    $row['db_password'] = base64_decode($row['db_password']);
+    
+    $remote = new RemoteController($row);
     $backupStatus = $remote->doSiteBackup();
 
     if($backupStatus === true) {
@@ -268,19 +254,19 @@ class BackupController extends Controller {
 
     // If Request data, Save new schedule
     $input = Request::input();
-    if(Request::isMethod('post') && isset($input['site_id']) && isset($input['cron_schedule'])) {
-      $id = DB::table('scheduler')->insert([
+    if(Request::isMethod('post') && isset($input['site_id']) && isset($input['frequency'])) {
+      $id = DB::table('jobs')->insert([
         'site_id' => $input['site_id'],
-        'cron_schedule' => $input['cron_schedule'],
+        'frequency' => $input['frequency'],
       ]);
       if($id) {
-        return redirect()->route('scheduler');
+        return redirect()->route('jobs');
       }
     }
 
     $sites = $this->backupRepo->getSites()->toArray();
-    $schedules = $this->backupRepo->getSchedules();
-    return view('pages.pageScheduler')->with('data', ['sites' => $sites, 'schedules' => $schedules]);
+    $jobs = $this->backupRepo->getJobs();
+    return view('pages.pageScheduler')->with('data', ['sites' => $sites, 'jobs' => $jobs]);
   }
   
 

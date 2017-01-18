@@ -7,8 +7,8 @@
  * https://www.sitepoint.com/phpseclib-securely-communicating-with-remote-servers-via-php/
  */
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
-use phpseclib\Crypt\RSA;
 use phpseclib\Net\SSH2;
 use phpseclib\Net\SFTP;
 use App\Models\Sites;
@@ -49,7 +49,8 @@ class RemoteController extends Controller {
 
     // Create backup folder if doesn't exist
     if (!file_exists($this->localBackupPath)) {
-      mkdir($this->localBackupPath, 0777, true);
+      mkdir($this->localBackupPath.'site/', 0777, true);
+      mkdir($this->localBackupPath.'db/', 0777, true);
     }
   }
 
@@ -94,42 +95,54 @@ class RemoteController extends Controller {
   public function doSiteBackup() {
     // SSH server -> compress folder (hash(sitename)_date)
     // SFTP Server -> download compressed folder
-    if(trim($this->site['ssh_path']) !== '' && isset($this->site['site_id'])) {
-
+    if(trim($this->site['ssh_path']) !== '' && isset($this->site['id'])) {
       // SSH into remote server if not already
       $this->connectSSH();
+      // SFTP into remote server if not already
+      $this->connectSFTP();
+
       $now = time();
       $remotePath = dirname($this->site['ssh_path']) . '/';
       $backupFilename = md5($this->site['ssh_address']).'_'.$now.'.tar.gz';
+      $mysqlDumpName = md5($this->site['ssh_address']).'_'.$now.'.sql';
+      $localSitePath = $this->localBackupPath.'site/'.$backupFilename;
+      $localDBPath = $this->localBackupPath.'db/'.$mysqlDumpName;
 
       // $cmdCompress = "tar cvf - ".$this->site['ssh_path']." | gzip -9 - > ".$remotePath.$backupFilename.PHP_EOL;
       $cmdCompress = "tar -zcvf ".$remotePath.$backupFilename." -C ".$this->site['ssh_path']." .".PHP_EOL;
-      $cmdDeleteArchive = "rm -f ".$remotePath.$backupFilename.PHP_EOL;
-
+      $cmdDeleteSiteArchive = "rm -f ".$remotePath.$backupFilename.PHP_EOL;
+      $cmdDeleteDBArchive = "rm -f ".$remotePath.$mysqlDumpName.PHP_EOL;
       // Compress remote directory
-      $this->ssh->exec($cmdCompress);
-      // SFTP into remote server if not already
-      $this->connectSFTP();
+      
       // Download the compressed/archived file from server to local /backups folder
-      $this->sftp->get($remotePath.$backupFilename, $this->localBackupPath.$backupFilename);
+      $siteDone = $this->sftp->get($remotePath.$backupFilename, $localSitePath);
       // Wait 5 seconds
       sleep(5);
       // Remove archived file from remote server
-      $this->ssh->exec($cmdDeleteArchive);
-
+      $this->ssh->exec($cmdDeleteSiteArchive);
+      if($siteDone && $this->site['is_db_backup_enabled']) {
+        // Export database
+        $this->ssh->exec("mysqldump --user={$this->site['db_username']} --password={$this->site['db_password']} --host={$this->site['db_host']} {$this->site['db_database']} > {$remotePath}{$mysqlDumpName}");
+        // Download database
+        $dbDone = $this->sftp->get($remotePath.$mysqlDumpName, $localDBPath);
+        $this->ssh->exec($cmdDeleteDBArchive);
+      }
+      
       //
       // STORE INFO IN DB
       //
-      $inserData = [
-        'site_id' => $this->site['site_id'],
-        'filename' => $backupFilename,
-        'filepath' => $this->localBackupPath.$backupFilename,
-        'checksum' => file_exists($this->localBackupPath.$backupFilename) ? md5_file($this->localBackupPath.$backupFilename) : '',
-      ];
-      Backups::insert($inserData);
-      Sites::find($this->site['site_id'])->update(['last_backup' => date('Y-m-d h:i:s', $now)]);
-
-      return true;
+      if($siteDone) { // && dbDone
+        $inserData = [
+          'site_id' => $this->site['id'],
+          'filename' => $backupFilename,
+          'filepath' => $localSitePath,
+          'dbpath' => isset($dbDone) ? $localDBPath : null,
+          'checksum' => file_exists($localSitePath) ? md5_file($localSitePath) : '',
+        ];
+        Backups::insert($inserData);
+        Sites::find($this->site['id'])->update(['last_backup' => date('Y-m-d h:i:s', $now)]);
+        return true;
+      }
     }
     return false;
   }
@@ -171,7 +184,5 @@ class RemoteController extends Controller {
     }
     return false;
   }
-
-    
 
 }

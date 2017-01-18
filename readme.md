@@ -7,6 +7,7 @@
 * Add Mysql config in .env file
 * Run `php artisan migrate` to setup your database from the schema
 * Run app using `php artisan serve`. Browse it on localhost:8000
+* If using Scheduler, add cron to crontab `* * * * * php /path/to/artisan schedule:run >> /dev/null 2>&1`
 
 ## Uses
 * Laravel Framework

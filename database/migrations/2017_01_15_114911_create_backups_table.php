@@ -16,7 +16,8 @@ class CreateBackupsTable extends Migration
             $table->increments('id');
             $table->integer('site_id')->unsigned();
             $table->string('filename', 255);  // Archive name
-            $table->string('filepath', 500);  // Full Archive path
+            $table->string('filepath', 500);  // Site Full Archive path
+            $table->string('dbpath', 500);  // DB Full Archive path
             $table->string('checksum', 255);  // Hash of archive file, if required for later checks
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
