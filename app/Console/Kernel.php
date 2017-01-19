@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $jobs = DB::select("
+        /*$jobs = DB::select("
             SELECT s.id, j.site_id, j.frequency, s.site_name, s.ssh_address, s.ssh_username, s.ssh_password, s.ssh_path,
                     s.db_host, s.db_database, s.db_username, s.db_password, s.is_db_backup_enabled
             FROM jobs j
@@ -41,7 +41,7 @@ class Kernel extends ConsoleKernel
                 $rc->doSiteBackup();
               }
           })->cron($job->frequency);
-        }
+        }*/
 
     }
 }

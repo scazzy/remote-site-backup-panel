@@ -4,10 +4,11 @@
 * Clone this git repo
 * Do `composer install` to install server side dependencies
 * Do `npm install` to install node dependencies. Make sure you have node js on your machine
-* Add Mysql config in .env file
+* Add Mysql config in .env file. You'll also need to generate an APP_KEY using `php artisan key:generate`
 * Run `php artisan migrate` to setup your database from the schema
-* Run app using `php artisan serve`. Browse it on localhost:8000
-* If using Scheduler, add cron to crontab `* * * * * php /path/to/artisan schedule:run >> /dev/null 2>&1`
+* Uncomment Lines 29:44 in /app/Console/Kernel.php
+* Run app using `php artisan serve`. Browse it on localhost:8000. You can also use php -S for a different port
+* If using Scheduler, add cron to crontab `* * * * * php /path/to/project/artisan schedule:run >> /dev/null 2>&1`
 
 ## Uses
 * Laravel Framework
