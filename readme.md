@@ -1,4 +1,8 @@
 # BackMeUp
+Simple tool to backup and restore your websites in a click. You can also backup your mysql databases.
+
+![Backup tool](http://i.imgur.com/sETbUc7.png "Backup Tool")
+
 
 ## Setup Instructions
 * Clone this git repo
